@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'active_support/concern'
-require 'fast_jsonapi/multi_to_json'
+require "active_support/concern"
+require "fast_jsonapi/multi_to_json"
 
 module FastJsonapi
   MandatoryField = Class.new(StandardError)
@@ -27,7 +27,7 @@ module FastJsonapi
     end
 
     class_methods do
-      def id_hash(id, record_type, default_return=false)
+      def id_hash(id, record_type, default_return = false)
         if id.present?
           { id: id.to_s, type: record_type }
         else
@@ -64,7 +64,7 @@ module FastJsonapi
 
       def record_hash(record, fieldset, params = {})
         if cached
-          record_hash = Rails.cache.fetch(record.cache_key, expires_in: cache_length, race_condition_ttl: race_condition_ttl) do
+          record_hash = Rails.cache.fetch(record.cache_key_with_version, expires_in: cache_length, race_condition_ttl: race_condition_ttl) do
             temp_hash = id_hash(id_from_record(record), record_type, true)
             temp_hash[:attributes] = attributes_hash(record, fieldset, params) if attributes_to_serialize.present?
             temp_hash[:relationships] = {}
@@ -88,7 +88,7 @@ module FastJsonapi
       def id_from_record(record)
         return record_id.call(record) if record_id.is_a?(Proc)
         return record.send(record_id) if record_id
-        raise MandatoryField, 'id is a mandatory field in the jsonapi spec' unless record.respond_to?(:id)
+        raise MandatoryField, "id is a mandatory field in the jsonapi spec" unless record.respond_to?(:id)
         record.id
       end
 
@@ -98,8 +98,8 @@ module FastJsonapi
       end
 
       def parse_include_item(include_item)
-        return [include_item.to_sym] unless include_item.to_s.include?('.')
-        include_item.to_s.split('.').map { |item| item.to_sym }
+        return [include_item.to_sym] unless include_item.to_s.include?(".")
+        include_item.to_s.split(".").map { |item| item.to_sym }
       end
 
       def remaining_items(items)
@@ -107,7 +107,7 @@ module FastJsonapi
 
         items_copy = items.dup
         items_copy.delete_at(0)
-        [items_copy.join('.').to_sym]
+        [items_copy.join(".").to_sym]
       end
 
       # includes handler
